@@ -72,10 +72,10 @@
   :group 'advance-words-count
   :type '(repeat regexp))
 
-(defcustom words-count-message-extra nil
+(defcustom words-count-message-func 'message--words-count
   "The function used to format message in `advance-words-count'."
   :group 'advance-words-count
-  :type '(repeat function))
+  :type '(function))
 
 (defun special--words-count (start end regexp)
   "Count the word from START to END with REGEXP."
@@ -145,7 +145,7 @@ See also `special-words-count'."
            (lambda (r) (special--words-count min max r))
            words-count-regexp-list))
     (if (called-interactively-p 'any)
-        (message--words-count list min max arg)
+        (funcall words-count-message-func list min max arg)
       list)))
 
 (provide 'advance-words-count)
