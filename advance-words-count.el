@@ -133,14 +133,19 @@ required to call extra functions, see `count-lines' &
   "Display the word count message.
 Using tool specified in `words-count-message-display'. The LIST
 will be passed to `format-message--words-count'. See
-`words-count-message-func'."
+`words-count-message-func'. If ARG is not ture, display in the
+minibuffer."
   (let ((opt words-count-message-display)
-        (string (apply #'format-message--words-count list)))
+        (string (apply #'format-message--words-count list))
+        (time nil))
     (if (null arg)
         (message string)
       (cond
        ((eq opt 'pos-tip)
-        (pos-tip-show string nil 13 nil 3000000))
+        (progn
+          (setq time (float-time))
+          (while (< (- (float-time) time) 5)
+            (pos-tip-show string nil nil nil -1))))
        ((eq 'minibuffer opt)
         (message string))))))
 
@@ -149,7 +154,8 @@ will be passed to `format-message--words-count'. See
   "Chinese user preferred word count.
 If BEG = END, count the whole buffer. If called initeractively,
 use minibuffer to display the messages. The optional ARG will be
-passed to `format-message--words-count' to decide the style of display.
+passed to `format-message--words-count' to decide the style of
+display.
 
 See also `special-words-count'."
   (interactive (if (use-region-p)
