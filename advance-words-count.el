@@ -142,16 +142,13 @@ minibuffer."
         (message string)
       (cond
        ((eq opt 'pos-tip)
-        (progn
-          (setq time (float-time))
-          (while (< (- (float-time) time) 5)
-            (pos-tip-show string nil nil nil -1))))
+        (run-at-time 0.1 nil #'pos-tip-show string nil nil nil -1))
        ((eq 'minibuffer opt)
         (message string))))))
 
 ;;;###autoload
-(defun advance-words-count (beg end &optional arg)
-  "Chinese user preferred word count.
+  (defun advance-words-count (beg end &optional arg)
+    "Chinese user preferred word count.
 If BEG = END, count the whole buffer. If called initeractively,
 use minibuffer to display the messages. The optional ARG will be
 passed to `format-message--words-count' to decide the style of
