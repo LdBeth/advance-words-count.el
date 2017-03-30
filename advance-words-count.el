@@ -97,7 +97,6 @@ required to call extra functions, see `count-lines' &
        "
 -----------~*~ Words Count ~*~----------
 
- Word Count .................... %d
  Characters (without Space) .... %d
  Characters (all) .............. %d
  Number of Lines ............... %d
@@ -105,24 +104,22 @@ required to call extra functions, see `count-lines' &
 %s
 ========================================
 "
-     "Wc:%d,Ns:%d,Al:%d,Ln:%d,An:%d,%s")
-   (+ (car list) (car (last list)))
+     "Ns:%d, Al:%d, Ln:%d, An:%d, %s")
    (cadr list)
    (- end start)
    (count-lines start end)
    (car (last list))
-   (concat
-    (unless (= 0 (car list))
-      (format (if arg
-                  " Chinese Chars ................. %d\n"
-                "Zh:%d,")
-              (car list)))
-    (format (if arg
-                " English Words ................. %d\n"
-              "En:%d")
-            (count-words start end))
-    (if words-count-message-extra
-        (eval words-count-message-extra)))))
+   (if (= 0 (car list))
+       (format (if arg
+                   " Latin Words ................... %d\n"
+                 "La:%d")
+               (count-words start end))
+     (format (if arg
+                 " CJK Chars ..................... %d
+ Word Count .................... %d\n"
+               "Ha:%d, Wc:%d")
+             (car list)
+             (+ (car list) (car (last list)))))))
 
 ;;;###autoload
 (defun advance-words-count (beg end &optional arg)
