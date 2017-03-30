@@ -72,10 +72,16 @@
   :group 'advance-words-count
   :type '(repeat regexp))
 
-(defcustom words-count-message-func 'message--words-count
+(defcustom words-count-message-func 'format-message--words-count
   "The function used to format message in `advance-words-count'."
   :group 'advance-words-count
   :type '(function))
+
+(defcustom words-count-message-display 'minibuffer
+  "The way how `message--words-count' display messages."
+  :group 'advance-words-count
+  :type '(choice (const minibuffer)
+                 (const pos-tip)))
 
 (defun special--words-count (start end regexp)
   "Count the word from START to END with REGEXP."
@@ -87,12 +93,12 @@
           (setq count (1+ count)))))
     count))
 
-(defun message--words-count (list start end &optional arg)
-  "Display the word count message.
+(defun format-message--words-count (list start end &optional arg)
+  "Format a string to be shown for `message--words-count'.
 Using the LIST passed form `advance-words-count'. START & END are
 required to call extra functions, see `count-lines' &
-`count-words'. When ARG is specified, display a verbose buffer."
-  (message
+`count-words'. When ARG is specified, display verbosely."
+  (format
    (if arg
        "
 -----------~*~ Words Count ~*~----------
@@ -121,12 +127,29 @@ required to call extra functions, see `count-lines' &
              (car list)
              (+ (car list) (car (last list)))))))
 
+(require 'pos-tip)
+
+(defun message--words-count (list &optional arg)
+  "Display the word count message.
+Using tool specified in `words-count-message-display'. The LIST
+will be passed to `format-message--words-count'. See
+`words-count-message-func'."
+  (let ((opt words-count-message-display)
+        (string (apply #'format-message--words-count list)))
+    (if (null arg)
+        (message string)
+      (cond
+       ((eq opt 'pos-tip)
+        (pos-tip-show string nil 13 nil 3000000))
+       ((eq 'minibuffer opt)
+        (message string))))))
+
 ;;;###autoload
 (defun advance-words-count (beg end &optional arg)
   "Chinese user preferred word count.
 If BEG = END, count the whole buffer. If called initeractively,
 use minibuffer to display the messages. The optional ARG will be
-passed to `message--words-count'.
+passed to `format-message--words-count' to decide the style of display.
 
 See also `special-words-count'."
   (interactive (if (use-region-p)
@@ -136,14 +159,14 @@ See also `special-words-count'."
                  (list nil nil (or current-prefix-arg nil))))
   (let ((min (or beg (point-min)))
         (max (or end (point-max)))
-        list)
-    (setq list
+        info)
+    (setq info
           (mapcar
            (lambda (r) (special--words-count min max r))
            words-count-regexp-list))
     (if (called-interactively-p 'any)
-        (funcall words-count-message-func list min max arg)
-      list)))
+        (message--words-count (list info min max arg) (if arg t))
+      info)))
 
 (provide 'advance-words-count)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
