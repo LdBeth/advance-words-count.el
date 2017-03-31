@@ -54,13 +54,13 @@ If BODY is specified, do BODY when enters MODE."
   (declare (indent 1))
   (let* ((name (intern (format "words-count-init-%S" mode)))
          (hook (intern (format "%s-hook" mode))))
-    `(progn
-       (add-hook (quote ,hook) 'wc-mode)
-       (if body
-           `(defun ,name ()
-              "set up `wc-mode' when called."
-              ,body)
-         (add-hook (quote ,hook) ,name)))))
+    (progn
+      `(add-hook (quote ,hook) 'wc-mode)
+      (if body
+          `(defun ,name ()
+             "set up `wc-mode' when called."
+             ,(append '(progn) body))
+        `(add-hook (quote ,hook) ,name)))))
 
 (provide 'advance-wc-mode)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
