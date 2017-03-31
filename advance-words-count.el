@@ -1,4 +1,4 @@
-;;; advance-words-count.el --- A Package Provides Extended `count-words' -*- lexbinding:t -*-
+;;; advance-words-count.el --- A Package Provides Extended `count-words'
 ;;
 ;; Filename: advance-words-count.el
 ;; Description: Provides Extended `count-words' function.
