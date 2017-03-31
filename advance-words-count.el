@@ -127,17 +127,23 @@ required to call extra functions, see `count-lines' &
              (car list)
              (+ (car list) (car (last list)))))))
 
-(defmacro words-count-define-func (name message rules &optional bind)
-  "foo"
+(defmacro words-count-define-func (name message &optional bind &rest rules)
+  "Define the function used to format the strings displayed.
+
+NAME = Function's name
+MESSAGE = A string used to display
+BIND = A boolean, if ture, bind the function to
+`words-count-message-func'
+RULES = A list of functions to format the string"
   `(progn
      (defun ,name (list start end &optional arg)
        "Format a string to be shown for `message--words-count'.
 Using the LIST passed form `advance-words-count'. START & END are
 required to call extra functions, see `count-lines' &
 `count-words'. When ARG is specified, display verbosely."
-       (format ,message ,rules))
+       ,(append `(format ,message) rules))
      (if ,bind
-         (setq words-count-message-func ,name))))
+         (setq words-count-message-func (function ,name)))))
 
 ;; (defmacro words-count-define-func (name message rules &optional bind verbo opt end)
 ;;   "foo"
