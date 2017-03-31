@@ -1,48 +1,48 @@
-;;; advance-words-count.el --- A Package Provides Extended `count-words'
-;; 
+;;; advance-words-count.el --- A Package Provides Extended `count-words' -*- lexbinding:t -*-
+;;
 ;; Filename: advance-words-count.el
 ;; Description: Provides Extended `count-words' function.
 ;; Author: LdBeth
 ;; Maintainer: LdBeth
 ;; Created: Wed Mar 29 14:42:25 2017 (+0800)
 ;; Version: 0.8.0
-;; Package-Requires: ()
-;; Last-Updated: 
-;;           By: 
+;; Package-Requires: (pos-tip)
+;; Last-Updated:
+;;           By:
 ;;     Update #: 0
-;; URL: 
-;; Doc URL: 
-;; Keywords: 
-;; Compatibility: 
-;; 
+;; URL:
+;; Doc URL:
+;; Keywords:
+;; Compatibility:
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
-;;; Commentary: 
-;; 
-;; 
-;; 
+;;
+;;; Commentary:
+;;
+;;
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;; Change Log:
-;; 
-;; 
+;;
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
 ;; your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
-;; 
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;; Code:
 (defgroup andvance-words-count nil
   "Extended `count-words' function."
@@ -106,7 +106,7 @@ required to call extra functions, see `count-lines' &
  Characters (without Space) .... %d
  Characters (all) .............. %d
  Number of Lines ............... %d
- ANSCII Chars .................. %d
+ ANSCII Words .................. %d
 %s
 ========================================
 "
@@ -136,19 +136,20 @@ will be passed to `format-message--words-count'. See
 `words-count-message-func'. If ARG is not ture, display in the
 minibuffer."
   (let ((opt words-count-message-display)
-        (string (apply #'format-message--words-count list))
+        (string (apply words-count-message-func list))
         (time nil))
     (if (null arg)
         (message string)
       (cond
        ((eq opt 'pos-tip)
+        ;; Use `run-at-time' to avoid the problem caued by `flycheck-pos-tip'.
         (run-at-time 0.1 nil #'pos-tip-show string nil nil nil -1))
        ((eq 'minibuffer opt)
         (message string))))))
 
 ;;;###autoload
-  (defun advance-words-count (beg end &optional arg)
-    "Chinese user preferred word count.
+(defun advance-words-count (beg end &optional arg)
+  "Chinese user preferred word count.
 If BEG = END, count the whole buffer. If called initeractively,
 use minibuffer to display the messages. The optional ARG will be
 passed to `format-message--words-count' to decide the style of
