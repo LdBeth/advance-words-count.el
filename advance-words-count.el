@@ -127,6 +127,53 @@ required to call extra functions, see `count-lines' &
              (car list)
              (+ (car list) (car (last list)))))))
 
+(defmacro words-count-define-func (name message rules &optional bind)
+  "foo"
+  `(progn
+     (defun ,name (list start end &optional arg)
+       "Format a string to be shown for `message--words-count'.
+Using the LIST passed form `advance-words-count'. START & END are
+required to call extra functions, see `count-lines' &
+`count-words'. When ARG is specified, display verbosely."
+       (format ,message ,rules))
+     (if ,bind
+         (setq words-count-message-func ,name))))
+
+;; (defmacro words-count-define-func (name message rules &optional bind verbo opt end)
+;;   "foo"
+;;   (let* ((string (if verbo
+;;                      `(if arg
+;;                           ,message
+;;                         ,verbo)
+;;                    message))
+;;          body)
+;;     (if opt
+;;         (setq body `(concat
+;;                      (format
+;;                       ,string ,rules)
+;;                      ,(words-count--build-cond opt)
+;;                      end)
+;;               (setq body `(format ,message ,rules)))
+;;       `(progn
+;;          (defun ,name (list start end &optional arg)
+;;            "Format a string to be shown for `message--words-count'.
+;; Using the LIST passed form `advance-words-count'. START & END are
+;; required to call extra functions, see `count-lines' &
+;; `count-words'. When ARG is specified, display verbosely."
+;;            body)
+;;          (if ,bind
+;;              (setq words-count-message-func ,name))))))
+
+;; (defun words-count--build-cond (opt)
+;;   "zz"
+;;   (let ((cache opt)
+;;         arg
+;;         op)
+;;     (when cache
+;;       (progn
+;;         (setq arg (pop cache))
+;;         (list 'if (car arg) 'arg (cadr arg))))))
+
 (require 'pos-tip)
 
 (defun message--words-count (list &optional arg)
@@ -162,8 +209,8 @@ See also `special-words-count'."
                          (or current-prefix-arg nil))
                  (list nil nil (or current-prefix-arg nil))))
   (if (called-interactively-p 'any)
-      (message--words-count ((advance-words-count beg end arg)
-                             info min max arg) (if arg t))
+      (message--words-count (advance-words-count beg end arg)
+                            (if arg t))
     (let ((min (or beg (point-min)))
           (max (or end (point-max))))
       (mapcar
