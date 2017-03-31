@@ -5,7 +5,7 @@
 ;; Author: LdBeth
 ;; Maintainer: LdBeth
 ;; Created: Wed Mar 29 14:42:25 2017 (+0800)
-;; Version: 0.8.0
+;; Version: 0.8.1
 ;; Package-Requires: (pos-tip)
 ;; Last-Updated:
 ;;           By:
@@ -161,16 +161,14 @@ See also `special-words-count'."
                          (region-end)
                          (or current-prefix-arg nil))
                  (list nil nil (or current-prefix-arg nil))))
-  (let ((min (or beg (point-min)))
-        (max (or end (point-max)))
-        info)
-    (setq info
-          (mapcar
-           (lambda (r) (special--words-count min max r))
-           words-count-regexp-list))
-    (if (called-interactively-p 'any)
-        (message--words-count (list info min max arg) (if arg t))
-      info)))
+  (if (called-interactively-p 'any)
+      (message--words-count ((advance-words-count beg end arg)
+                             info min max arg) (if arg t))
+    (let ((min (or beg (point-min)))
+          (max (or end (point-max))))
+      (mapcar
+       (lambda (r) (special--words-count min max r))
+       words-count-regexp-list))))
 
 (provide 'advance-words-count)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
