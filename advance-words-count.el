@@ -162,8 +162,8 @@ See also `special-words-count'."
                          (or current-prefix-arg nil))
                  (list nil nil (or current-prefix-arg nil))))
   (if (called-interactively-p 'any)
-      (message--words-count ((advance-words-count beg end arg)
-                             info min max arg) (if arg t))
+      (message--words-count (advance-words-count beg end arg)
+                            (if arg t))
     (let ((min (or beg (point-min)))
           (max (or end (point-max))))
       (mapcar
