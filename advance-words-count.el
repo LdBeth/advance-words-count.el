@@ -5,11 +5,11 @@
 ;; Author: LdBeth <andpuke@foxmail.com>
 ;; Maintainer: LdBeth <andpuke@foxmail.com>
 ;; Created: Wed Mar 29 14:42:25 2017 (+0800)
-;; Version: 0.8.1
+;; Version: 0.8.8
 ;; Package-Requires: (pos-tip)
 ;; Last-Updated:
 ;;           By:
-;;     Update #: 0
+;;     Update #: 1
 ;; URL: https://github.com/LdBeth/advance-words-count.el/
 ;; Doc URL:
 ;; Keywords: wp
@@ -49,8 +49,8 @@
   :prefix "words-count"
   :group 'text)
 
-(defcustom words-count-rule-chinese "\\cc"
-  "A regexp string to match Chinese characters."
+(defcustom words-count-rule-CJK "\\cc"
+  "A regexp string to match CJK characters."
   :group 'advance-words-count
   :type 'string)
 
@@ -65,17 +65,19 @@
   :type 'string)
 
 (defcustom words-count-regexp-list
-  (list words-count-rule-chinese
+  (list words-count-rule-CJK
         words-count-rule-nonespace
         words-count-rule-ansci)
   "A list for the regexp used in `advance-words-count'."
   :group 'advance-words-count
   :type '(repeat regexp))
+(make-variable-buffer-local 'words-count-regexp-list)
 
 (defcustom words-count-message-function 'words-count--format-message
   "The function used to format message in `advance-words-count'."
   :group 'advance-words-count
   :type '(function))
+(make-variable-buffer-local 'words-count-message-function)
 
 (defcustom words-count-message-display 'minibuffer
   "The way how `words-count--message' display messages."
@@ -93,6 +95,7 @@
           (setq count (1+ count)))))
     count))
 
+;; This function is perserved as an exmple for configuration.
 (defun words-count--format-message (cons &optional arg)
   "Format a string to be shown for `words-count--message'.
 Using the CONS passed form `advance-words-count'. See
@@ -132,7 +135,8 @@ verbosely."
                (+ (car list) (car (last list))))))))
 
 ;;;###autoload
-(defmacro define-words-count-function (name message rules &optional bind regexp)
+(defmacro define-words-count-function
+    (name message rules &optional bind regexp)
   "Define the function used to format the strings displayed.
 
 NAME    = Function's name.
@@ -159,7 +163,9 @@ verbosely."
      (if ,bind
          (setq words-count-message-function (function ,name)))))
 
-;; (defmacro words-count-define-func (name message rules &optional bind verbo opt end)
+;;TODO Improve this macro tosupport more complicate functions
+;; (defmacro words-count-define-func
+;;     (name message rules &optional bind verbo opt end)
 ;;   "foo"
 ;;   (let* ((string (if verbo
 ;;                      `(if arg
