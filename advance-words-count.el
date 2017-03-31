@@ -93,14 +93,18 @@
           (setq count (1+ count)))))
     count))
 
-(defun format-message--words-count (list start end &optional arg)
+(defun format-message--words-count (cons &optional arg)
   "Format a string to be shown for `message--words-count'.
-Using the LIST passed form `advance-words-count'. START & END are
-required to call extra functions, see `count-lines' &
-`count-words'. When ARG is specified, display verbosely."
-  (format
-   (if arg
-       "
+Using the CONS passed form `advance-words-count'. See
+`count-lines' & `count-words'. When ARG is specified, display
+verbosely."
+  (let ((start (car cons))
+        (end (cdr cons))
+        list)
+    (setq list (advance-words-count start end))
+    (format
+     (if arg
+         "
 -----------~*~ Words Count ~*~----------
 
  Characters (without Space) .... %d
@@ -110,33 +114,95 @@ required to call extra functions, see `count-lines' &
 %s
 ========================================
 "
-     "Ns:%d, Al:%d, Ln:%d, An:%d, %s")
-   (cadr list)
-   (- end start)
-   (count-lines start end)
-   (car (last list))
-   (if (= 0 (car list))
+       "Ns:%d, Al:%d, Ln:%d, An:%d, %s")
+     (cadr list)
+     (- end start)
+     (count-lines start end)
+     (car (last list))
+     (if (= 0 (car list))
+         (format (if arg
+                     " Latin Words ................... %d\n"
+                   "La:%d")
+                 (count-words start end))
        (format (if arg
-                   " Latin Words ................... %d\n"
-                 "La:%d")
-               (count-words start end))
-     (format (if arg
-                 " CJK Chars ..................... %d
+                   " CJK Chars ..................... %d
  Word Count .................... %d\n"
-               "Ha:%d, Wc:%d")
-             (car list)
-             (+ (car list) (car (last list)))))))
+                 "Ha:%d, Wc:%d")
+               (car list)
+               (+ (car list) (car (last list))))))))
+
+(defmacro words-count-define-func (name message rules &optional bind regexp)
+  "Define the function used to format the strings displayed.
+
+NAME    = Function's name.
+MESSAGE = A string used to display.
+RULES   = A list of functions to form the string.
+BIND    = A boolean, if ture, bind the function to
+          `words-count-message-func'.
+REGEXP  = A list of regexp to call, if not specified, use
+          `words-count-regexp-list'."
+  `(progn
+     (defun ,name (cons &optional arg)
+       "Format a string to be shown for `message--words-count'.
+Using the CONS passed form `advance-words-count'. See
+`count-lines' & `count-words'. When ARG is specified, display
+verbosely."
+       (let ,(append
+              '((start (car cons)))
+              '((end (cdr cons)))
+              (if regexp
+                  `(words-count-regexp-list ,regexp))
+              '(list))
+         (setq list (advance-words-count start end))
+         ,(append `(format ,message) rules)))
+     (if ,bind
+         (setq words-count-message-func (function ,name)))))
+
+;; (defmacro words-count-define-func (name message rules &optional bind verbo opt end)
+;;   "foo"
+;;   (let* ((string (if verbo
+;;                      `(if arg
+;;                           ,message
+;;                         ,verbo)
+;;                    message))
+;;          body)
+;;     (if opt
+;;         (setq body `(concat
+;;                      (format
+;;                       ,string ,rules)
+;;                      ,(words-count--build-cond opt)
+;;                      end)
+;;               (setq body `(format ,message ,rules)))
+;;       `(progn
+;;          (defun ,name (list start end &optional arg)
+;;            "Format a string to be shown for `message--words-count'.
+;; Using the LIST passed form `advance-words-count'. START & END are
+;; required to call extra functions, see `count-lines' &
+;; `count-words'. When ARG is specified, display verbosely."
+;;            body)
+;;          (if ,bind
+;;              (setq words-count-message-func ,name))))))
+
+;; (defun words-count--build-cond (opt)
+;;   "zz"
+;;   (let ((cache opt)
+;;         arg
+;;         op)
+;;     (when cache
+;;       (progn
+;;         (setq arg (pop cache))
+;;         (list 'if (car arg) 'arg (cadr arg))))))
 
 (require 'pos-tip)
 
-(defun message--words-count (list &optional arg)
+(defun message--words-count (cons &optional arg)
   "Display the word count message.
-Using tool specified in `words-count-message-display'. The LIST
+Using tool specified in `words-count-message-display'. The CONS
 will be passed to `format-message--words-count'. See
 `words-count-message-func'. If ARG is not ture, display in the
 minibuffer."
   (let ((opt words-count-message-display)
-        (string (apply words-count-message-func list))
+        (string (funcall words-count-message-func cons))
         (time nil))
     (if (null arg)
         (message string)
@@ -162,13 +228,12 @@ See also `special-words-count'."
                          (or current-prefix-arg nil))
                  (list nil nil (or current-prefix-arg nil))))
   (if (called-interactively-p 'any)
-      (message--words-count (advance-words-count beg end arg)
-                            (if arg t))
-    (let ((min (or beg (point-min)))
-          (max (or end (point-max))))
-      (mapcar
-       (lambda (r) (special--words-count min max r))
-       words-count-regexp-list))))
+      (let ((min (or beg (point-min)))
+            (max (or end (point-max))))
+        (message--words-count (cons min max) (if arg t)))
+        (mapcar
+         (lambda (r) (special--words-count beg end r))
+         words-count-regexp-list)))
 
 (provide 'advance-words-count)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
