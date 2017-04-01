@@ -19,12 +19,15 @@
 ;;
 ;;; Commentary:
 ;;
-;;
+;; Inspired by `wc-mode'(URL: https://github.com/bnbeckwith/wc-mode).
+;; Focus on run time efficiency.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Change Log:
 ;;
+;;
+;; 0.8.0 Initial.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -47,7 +50,7 @@
 (defgroup andvance-words-count nil
   "Extended `count-words' function."
   :prefix "words-count"
-  :group 'text)
+  :group 'wp)
 
 (defcustom words-count-rule-CJK "\\cc"
   "A regexp string to match CJK characters."
@@ -221,7 +224,7 @@ minibuffer."
         (message string))))))
 
 ;;;###autoload
-(defun advance-words-count (beg end &optional arg)
+(defun advance-words-count (&optional beg end arg)
   "Chinese user preferred word count.
 If BEG = END, count the whole buffer. If called initeractively,
 use minibuffer to display the messages. The optional ARG will be
