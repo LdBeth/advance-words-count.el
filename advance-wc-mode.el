@@ -26,6 +26,8 @@
 ;;; Change Log:
 ;;
 ;;
+;; 0.8.0 Forked from `wc-mode'
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; This program is free software: you can redistribute it and/or modify
@@ -95,8 +97,8 @@ Can be a list.")
 
 (defvar wc-modeline-format-alist
   '(("%W" . (number-to-string advance-wc-orig-words))
-    ("%w" . (wc-prepend-sign advance-wc-words-delta))
-    ("%gw" . (wc-prepend-sign advance-wc-word-goal))
+    ("%w" . (advance-wc-prepend-sign advance-wc-words-delta))
+    ("%gw" . (advance-wc-prepend-sign advance-wc-word-goal))
     ("%tw" . (number-to-string (+ advance-wc-orig-words advance-wc-words-delta))))
   "Format and value pairs.
 Format will be evaluated in `advance-wc-generate-modeline'")
@@ -110,14 +112,13 @@ Format will be evaluated in `advance-wc-generate-modeline'")
         (setq str (replace-match (eval (cdr pair)) t t str))))))
 
 (defsubst advance-wc-prepend-sign (val)
-  "Add a sign to the beginning of VAL.
-Also cheat here a bit and add nil-value processing."
+  "add a sign to the beginning of val.
+also cheat here a bit and add nil-value processing."
   (if val
-      (format "%s%d"
-        (if (< val 0)
-		  "-" "+")
-	      (abs val))
-    "none"))
+      (if (< val 0)
+          (number-to-string val)
+        (concat "+" (number-to-string val)))
+    "N/A"))
 
 (defun advance-wc-reset ()
   "Reset the original word count to their current value."
@@ -146,7 +147,7 @@ Also cheat here a bit and add nil-value processing."
   "Generate the modeline."
   (let ((modeline (advance-wc-format-modeline-string advance-wc-modeline-format)))
     (when (advance-wc-goal-reached)
-      (put-text-property 0 (length modeline) 'face 'wc-goal-face modeline))
+      (put-text-property 0 (length modeline) 'face 'advance-wc-goal-face modeline))
     (list " " modeline)))
 
 (defun advance-wc-mode-update ()
@@ -179,8 +180,6 @@ value is non-nil."
   :lighter (:eval (advance-wc-mode-update))
   ;; The customization group
   :group 'advance-wc-mode
-  ;; The local keymap to use
-  :keymap wc-mode-map
   ;; The mode body code
   (if advance-wc-mode
       (run-mode-hooks  'advance-wc-mode-hooks)))
